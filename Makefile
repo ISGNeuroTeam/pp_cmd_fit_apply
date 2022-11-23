@@ -10,17 +10,18 @@ all:
  pack - make output archive, file name format \"fit_vX.Y.Z_BRANCHNAME.tar.gz\"\n\
 "
 
-VERSION := "0.0.1"
+VERSION := 0.0.1
 BRANCH := $(shell git name-rev $$(git rev-parse HEAD) | cut -d\  -f2 | sed -re 's/^(remotes\/)?origin\///' | tr '/' '_')
 
 pack: make_build
 	rm -f fit-*.tar.gz
 	rm -f apply-*.tar.gz
+	rm -f get_coef-*.tar.gz
 	echo Create archive \"fit-apply-$(VERSION)-$(BRANCH).tar.gz\"
-	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply ts_forecast_venv
+	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coef ts_forecast_venv
 
 clean_pack:
-	rm -f fit-*.tar.gz
+	rm -f *.tar.gz
 
 
 
@@ -32,8 +33,10 @@ make_build:
 	mkdir make_build
 	cp -R ./fit make_build
 	cp -R ./apply make_build
+	cp -R ./get_coef make_build
 	cp *.md make_build/fit/
 	cp *.md make_build/apply/
+	cp *.md make_build/get_coef/
 
 	mkdir -p make_build/ts_forecast_venv/lib/python3.9/site-packages
 	cp -R ./ts_forecasting  make_build/ts_forecast_venv/lib/python3.9/site-packages

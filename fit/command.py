@@ -71,4 +71,9 @@ class FitCommand(BaseCommand):
         model.fit(df, target_col, features_cols=feature_cols)
 
         dump(model, full_model_path)
-        return df
+        if model.params.name == 'lr':
+            data = model.get_coeffs()
+            return pd.DataFrame(data, columns=['feature', 'coef'])
+        else:
+            return df
+
