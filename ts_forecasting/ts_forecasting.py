@@ -186,3 +186,86 @@ class TimeSeriesXGBForecaster(TimeSeriesForecaster):
 
     def get_regressor_class(self):
         return XGBRegressor
+
+
+class TimeSeriesProphetForecaster(TimeSeriesForecaster):
+    def get_regressor_params(self) -> Dict:
+        return {
+            'growth': 'linear',
+            'seasonality_mode': self.params.seasonality_mode,
+            'daily_seasonality': True,
+            'weekly_seasonality': True,
+            # TODO: если данных много то включать yearly_seasonality
+            #'changepoint_prior_scale': 0.01
+        }
+
+    def get_regressor_class(self):
+        pass
+
+    def create_regressor(self):
+        # holidays = self._get_holidays_for_prophet(
+        #     #     start_date=df_prophet['ds'].min(),
+        #     #     end_date=df_prophet['ds'].max() #TODO: должно включать будущее же (?)
+        #     # )
+        m = Prophet(
+            **self.get_regressor_params(),
+            # holidays=holidays
+        )#.add_seasonality(
+        #    name='monthly',
+        #    period=30.5,
+        #    fourier_order=12
+        #)
+        if self.params.freq == "D":
+            m = m.add_seasonality(
+                name='monthly',
+                period=30.5,
+                fourier_order=12
+            )
+        else: # "H"
+            #m = m.add_seasonality(
+            #    name='hourly',
+            #    period=1/24,
+            #    fourier_order=10
+            #)
+            pass
+        m.add_country_holidays(country_name='RU')
+        return m
+
+    def fit(self,
+            target_df: pd.DataFrame,
+            target_col: str) -> TimeSeriesForecaster:
+        self.history_end_date_ = target_df.index.max()  # запоминаем для расчета дат прогноза в predict()
+        target_df = target_df.copy()
+        target_df[target_col] = np.log(target_df[target_col] + 0.0001)
+        prophet_df = target_df \
+            .reset_index() \
+            .rename(columns={target_col: 'y', DT_INDEX_NAME: 'ds'})
+        self.pipeline.named_steps["regressor"].fit(prophet_df)
+        return self
+
+    def predict(self,
+                period: int = 100,
+                target_col_as: Optional[str] = None) -> pd.DataFrame:
+
+        freq = self.params.freq
+        prophet = self.pipeline.named_steps["regressor"]
+        future = prophet.make_future_dataframe(periods=period, freq=freq)
+
+        forecast = prophet.predict(future)
+        forecast['yhat'] = np.exp(forecast['yhat'])
+
+        target_col = target_col_as if target_col_as else 'value_pred'
+        forecast = forecast[forecast['ds'] > self.history_end_date_]  # Обрезаем историю, возвращаем только будущее
+        forecast = (
+            forecast
+            .rename(
+                columns={
+                    'yhat': target_col,
+                    'ds': DT_INDEX_NAME,
+                }
+            )
+            .set_index(DT_INDEX_NAME)
+        )
+        return forecast
+
+
