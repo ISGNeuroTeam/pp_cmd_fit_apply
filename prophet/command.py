@@ -50,5 +50,7 @@ class ProphetCommand(BaseCommand):
         )
         model = TimeSeriesProphetForecaster(model_params)
         model.fit(df, column_name)
+        result_df = model.predict(future_periods)
+        result_df['_time'] = result_df.index.view('int64')
 
-        return model.predict(future_periods)
+        return result_df[['_time', 'value_pred']]

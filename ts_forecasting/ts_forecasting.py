@@ -236,7 +236,7 @@ class TimeSeriesProphetForecaster(TimeSeriesForecaster):
             target_col: str) -> TimeSeriesForecaster:
         self.history_end_date_ = target_df.index.max()  # запоминаем для расчета дат прогноза в predict()
         target_df = target_df.copy()
-        target_df[target_col] = np.log(target_df[target_col] + 0.0001)
+        #target_df[target_col] = np.log(target_df[target_col] + 0.0001)
         prophet_df = target_df \
             .reset_index() \
             .rename(columns={target_col: 'y', DT_INDEX_NAME: 'ds'})
@@ -252,7 +252,7 @@ class TimeSeriesProphetForecaster(TimeSeriesForecaster):
         future = prophet.make_future_dataframe(periods=period, freq=freq)
 
         forecast = prophet.predict(future)
-        forecast['yhat'] = np.exp(forecast['yhat'])
+        #forecast['yhat'] = np.exp(forecast['yhat'])
 
         target_col = target_col_as if target_col_as else 'value_pred'
         forecast = forecast[forecast['ds'] > self.history_end_date_]  # Обрезаем историю, возвращаем только будущее
