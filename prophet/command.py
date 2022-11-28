@@ -14,6 +14,7 @@ class ProphetCommand(BaseCommand):
             Keyword("future", required=False, otl_type=OTLType.INTEGER),
             Keyword("modelType", required=False, otl_type=OTLType.TEXT),
             Keyword("period", required=False, otl_type=OTLType.TEXT),
+            Keyword("historyDepth", required=False, otl_type=OTLType.STRING),
             Keyword("time_field", required=False, otl_type=OTLType.TEXT)
         ],
     )
@@ -40,6 +41,9 @@ class ProphetCommand(BaseCommand):
             period = period[1]
 
         time_field = self.get_arg('time_field').value or '_time'
+
+        history_depth = self.get_arg("historyDepth") or None
+
 
         df['dt'] = pd.to_datetime(df[time_field], unit='s')
         df = df.set_index('dt')
