@@ -15,5 +15,22 @@ Usage example:
 ... | prophet value, future=101, period='D', modelType=additive
 ```
 
-
-
+## Getting started
+1. Make develop python virtual environment
+    ```bash
+    make dev
+    ```
+2. Configure `otl_v1` command
+    ```bash
+    vi venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini
+    ```
+3. Activate virtual environment
+   ```bash
+   source ./venv/bin/activate
+   ```
+4. Launch post-processing interpreter
+   ```bash
+   pp
+   ```
+5. Make sure that `otl_v1 ` works
+  | otl_v1 <# makeresults count=3 #>
