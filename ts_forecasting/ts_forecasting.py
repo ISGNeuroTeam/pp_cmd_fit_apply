@@ -131,7 +131,8 @@ class TimeSeriesForecaster(ABC):
         if self.params.is_boxcox:
             pred = np.exp(pred)
         target_col = target_col_as if target_col_as else 'value_pred'
-        return pd.DataFrame(pred, index=X.index, columns=[target_col])
+        features_df[target_col] = pred
+        return features_df
 
     def persist(self, folder: str):
         persist_path = os.path.join(folder, f"{self.params.name}.pickle")
