@@ -7,7 +7,7 @@ from pathlib import Path
 from ts_forecasting.ts_forecasting import TimeSeriesLinearRegressionForecaster
 
 
-class GetCoefCommand(BaseCommand):
+class GetCoeffsCommand(BaseCommand):
     # define syntax of your command here
     syntax = Syntax(
         [
@@ -28,6 +28,6 @@ class GetCoefCommand(BaseCommand):
 
         model: TimeSeriesLinearRegressionForecaster = load(full_model_path)
         data = model.get_coeffs()
-        return pd.DataFrame(data, columns=['feature', 'coef'])
+        return pd.DataFrame(data, columns=['feature', 'coeff'])
 
 
