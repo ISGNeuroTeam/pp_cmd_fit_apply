@@ -34,4 +34,12 @@ class ApplyCommand(BaseCommand):
         df = df.set_index('dt')
 
         model: TimeSeriesLinearRegressionForecaster = load(full_model_path)
-        return model.predict(df)
+        predicted_df = model.predict(
+            features_df=df,
+            features_cols=model.non_ar_features_,
+            target_col_as=f'{model_name}_prediction'
+        )
+        predicted_df[time_field] = predicted_df.index.view('int64') // 1000000000
+        predicted_df = predicted_df.reset_index().drop(columns=['dt'])
+
+        return predicted_df

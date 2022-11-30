@@ -1,6 +1,7 @@
 import pandas as pd
 from otlang.sdk.syntax import Keyword, Positional, OTLType
 from pp_exec_env.base_command import BaseCommand, Syntax
+from datetime import datetime
 
 from ts_forecasting.model_params import ModelParams
 from ts_forecasting.ts_forecasting import TimeSeriesProphetForecaster
@@ -27,13 +28,13 @@ class ProphetCommand(BaseCommand):
         if column_name not in df.columns:
             raise ValueError(f'Target {column_name} doesn\'t exist in dataframe')
 
-        future_periods = self.get_arg('future').value or 100
+        future_periods = self.get_arg('future').value
 
         model_type = self.get_arg('modelType').value or 'multiplicative'
         if model_type not in ModelParams.SEASONALITY_MODES:
             raise ValueError(f'Wrong model type. Available model types: additive, multiplicative')
-        period = self.get_arg('period').value or 'D'
 
+        period = self.get_arg('period').value or 'D'
         period = period.upper()
         if period not in ('1H', '1D', 'H', 'D'):
             raise ValueError(f'Period must be one of: "H"  or "D"')
@@ -42,19 +43,25 @@ class ProphetCommand(BaseCommand):
 
         time_field = self.get_arg('time_field').value or '_time'
 
-        history_depth = self.get_arg("historyDepth") or None
-
-
         df['dt'] = pd.to_datetime(df[time_field], unit='s')
         df = df.set_index('dt')
+
+        history_depth = self.get_arg("historyDepth") or None
+        if history_depth is not None:
+            try:
+                start_date = datetime.strptime(history_depth.value, "%d%m%Y").date()
+            except ValueError:
+                raise ValueError("Incorrect historyDepth data format, should be DD-MM-YYYY")
+            df = df.loc[df.index >= start_date]
+
         model_params = ModelParams(
             name='prophet', seasonality_mode=model_type,
-            is_boxcox=False, is_autoregression=True,
+            is_boxcox=False, is_autoregression=False,
             freq=period
         )
         model = TimeSeriesProphetForecaster(model_params)
         model.fit(df, column_name)
         result_df = model.predict(future_periods)
-        result_df['_time'] = result_df.index.view('int64') // 1000000000
+        result_df[time_field] = result_df.index.view('int64') // 1000000000
 
-        return result_df[['_time', 'value_pred']]
+        return result_df[[time_field, 'prophet_prediction']]

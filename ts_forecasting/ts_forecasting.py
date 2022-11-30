@@ -23,9 +23,9 @@ from .constants import *
 class TimeSeriesForecaster(ABC):
     params: ModelParams
     pipeline: Pipeline
-    features_: List[str] = None
+    features_: Optional[List[str]] = None
+    non_ar_features_: Optional[List[str]] = None
     autoregression_features_: Optional[Dict] = None
-    selected_features_: Optional[List[str]] = None
 
     def __init__(self, params: ModelParams):
         self.params = params
@@ -64,6 +64,8 @@ class TimeSeriesForecaster(ABC):
 
             # 19-10-2022:
             self.trend_model_ = None
+
+            self.non_ar_features_ = features_cols
         else:
             if not self.params.is_autoregression:
                 #raise ValueError("Either autoregression flag or features dataframe must be set!")
@@ -245,7 +247,7 @@ class TimeSeriesProphetForecaster(TimeSeriesForecaster):
         return self
 
     def predict(self,
-                period: int = 100,
+                period: int,
                 target_col_as: Optional[str] = None) -> pd.DataFrame:
 
         freq = self.params.freq
@@ -268,5 +270,3 @@ class TimeSeriesProphetForecaster(TimeSeriesForecaster):
             .set_index(DT_INDEX_NAME)
         )
         return forecast
-
-

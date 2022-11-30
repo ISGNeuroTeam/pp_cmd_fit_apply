@@ -27,11 +27,11 @@ class FitCommand(BaseCommand):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         self.log_progress('Start ts_fit command')
 
-        # Check time series type
-        ts_type = self.get_arg('ts_type').value
-        if ts_type not in ModelParams.MODELS:
-            ts_types_str = '\n'.join([f'- {key} - {value}' for key, value in ModelParams.MODELS.items()])
-            raise ValueError(f'Unsupported forecaster type. Known types is:\n {ts_types_str}')
+        # Check model type
+        model_type = self.get_arg('model_type').value
+        if model_type not in ModelParams.MODELS:
+            model_types_str = '\n'.join([f'- {key} - {value}' for key, value in ModelParams.MODELS.items()])
+            raise ValueError(f'Unsupported forecaster type. Known types is:\n {model_types_str}')
 
         # Check from word
         from_word = self.get_arg("from_word").value
@@ -58,22 +58,25 @@ class FitCommand(BaseCommand):
         time_field = self.get_arg('time_field').value or '_time'
 
         if time_field not in df.columns:
-            raise ValueError(f'Time field "{time_field}" not exist')
+            raise ValueError(f'Time column "{time_field}" not exist')
 
         df['dt'] = pd.to_datetime(df[time_field], unit='s')
         df = df.set_index('dt')
 
         model_params = ModelParams(
-            is_boxcox=False, is_autoregression=True, name=ts_type
+            is_boxcox=False, is_autoregression=True, name=model_type
         )
         model = TimeSeriesForecaster.from_params(params=model_params)
-
-        model.fit(df, target_col, features_cols=feature_cols)
+        model.fit(target_df=df, target_col=target_col, features_df=df, features_cols=feature_cols)
 
         dump(model, full_model_path)
-        if model.params.name == 'lr':
-            data = model.get_coeffs()
-            return pd.DataFrame(data, columns=['feature', 'coef'])
-        else:
-            return df
 
+        predicted_df = model.predict(
+            features_df=df,
+            features_cols=feature_cols,
+            target_col_as=f'{model_name}_prediction'
+        )
+
+        df = pd.concat([df, predicted_df[[f'{model_name}_prediction']]], axis=1)
+
+        return df
