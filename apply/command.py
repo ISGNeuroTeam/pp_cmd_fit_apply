@@ -20,13 +20,10 @@ class ApplyCommand(BaseCommand):
     idempotent = True  # Does not invalidate cache
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-
         model_name = self.get_arg('model_name').value
-
         models_dir = Path(self.config['dir']['model_dir'])
         if not models_dir.exists():
-            models_dir.mkdir(exist_ok=True)
-
+            raise ValueError(f'Models directory "{models_dir}" not exist')
         full_model_path = Path(self.config['dir']['model_dir']) / model_name
 
         time_field = self.get_arg('time_field').value or '_time'

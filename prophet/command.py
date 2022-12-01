@@ -1,7 +1,6 @@
 import pandas as pd
 from otlang.sdk.syntax import Keyword, Positional, OTLType
 from pp_exec_env.base_command import BaseCommand, Syntax
-from datetime import datetime
 
 from ts_forecasting.model_params import ModelParams
 from ts_forecasting.ts_forecasting import TimeSeriesProphetForecaster
@@ -15,7 +14,6 @@ class ProphetCommand(BaseCommand):
             Keyword("future", required=False, otl_type=OTLType.INTEGER),
             Keyword("modelType", required=False, otl_type=OTLType.TEXT),
             Keyword("period", required=False, otl_type=OTLType.TEXT),
-            Keyword("historyDepth", required=False, otl_type=OTLType.STRING),
             Keyword("time_field", required=False, otl_type=OTLType.TEXT)
         ],
     )
@@ -37,7 +35,7 @@ class ProphetCommand(BaseCommand):
         period = self.get_arg('period').value or 'D'
         period = period.upper()
         if period not in ('1H', '1D', 'H', 'D'):
-            raise ValueError(f'Period must be one of: "H"  or "D"')
+            raise ValueError(f'Period must be one of: "H" or "D"')
         if period[0] == '1':
             period = period[1]
 
@@ -46,14 +44,6 @@ class ProphetCommand(BaseCommand):
         df['dt'] = pd.to_datetime(df[time_field], unit='s')
         df = df.set_index('dt')
 
-        history_depth = self.get_arg("historyDepth") or None
-        if history_depth is not None:
-            try:
-                start_date = datetime.strptime(history_depth.value, "%d%m%Y").date()
-            except ValueError:
-                raise ValueError("Incorrect historyDepth data format, should be DD-MM-YYYY")
-            df = df.loc[df.index >= start_date]
-
         model_params = ModelParams(
             name='prophet', seasonality_mode=model_type,
             is_boxcox=False, is_autoregression=False,
@@ -61,7 +51,9 @@ class ProphetCommand(BaseCommand):
         )
         model = TimeSeriesProphetForecaster(model_params)
         model.fit(df, column_name)
-        result_df = model.predict(future_periods)
+        result_df = model.predict(future_periods, target_col_as='prophet_prediction')
+
         result_df[time_field] = result_df.index.view('int64') // 1000000000
+        result_df = result_df.reset_index().drop(columns=['dt'])
 
         return result_df[[time_field, 'prophet_prediction']]

@@ -12,7 +12,7 @@ class FitCommand(BaseCommand):
     # define syntax of your command here
     syntax = Syntax(
         [
-            Positional("ts_type", required=True, otl_type=OTLType.TERM),
+            Positional("model_type", required=True, otl_type=OTLType.TERM),
             Positional("target_col", required=True, otl_type=OTLType.STRING),
             Positional("from_word", required=True, otl_type=OTLType.TERM),
             Positional("feature_cols", required=True, otl_type=OTLType.STRING),
@@ -52,11 +52,10 @@ class FitCommand(BaseCommand):
         model_name = self.get_arg('model_name').value
         models_dir = Path(self.config['dir']['model_dir'])
         if not models_dir.exists():
-            models_dir.mkdir(exist_ok=True)
-
+            models_dir.mkdir(parents=True, exist_ok=True)
         full_model_path = Path(self.config['dir']['model_dir']) / model_name
-        time_field = self.get_arg('time_field').value or '_time'
 
+        time_field = self.get_arg('time_field').value or '_time'
         if time_field not in df.columns:
             raise ValueError(f'Time column "{time_field}" not exist')
 
@@ -67,16 +66,23 @@ class FitCommand(BaseCommand):
             is_boxcox=False, is_autoregression=True, name=model_type
         )
         model = TimeSeriesForecaster.from_params(params=model_params)
-        model.fit(target_df=df, target_col=target_col, features_df=df, features_cols=feature_cols)
+        copy_df = df.copy()
+        model.fit(
+            target_df=copy_df[[target_col]],
+            target_col=target_col,
+            features_df=copy_df[feature_cols],
+            features_cols=feature_cols
+        )
 
         dump(model, full_model_path)
 
         predicted_df = model.predict(
-            features_df=df,
+            features_df=copy_df,
             features_cols=feature_cols,
             target_col_as=f'{model_name}_prediction'
         )
 
         df = pd.concat([df, predicted_df[[f'{model_name}_prediction']]], axis=1)
+        df = df.reset_index().drop(columns=['dt'])
 
         return df
