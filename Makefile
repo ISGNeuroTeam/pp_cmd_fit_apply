@@ -36,7 +36,7 @@ clean_conda:
 pack: make_build
 	rm -f *.tar.gz
 	echo Create archive \"fit-apply-$(VERSION)-$(BRANCH).tar.gz\"
-	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coef prophet ts_forecast_venv
+	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coeffs prophet model ts_forecast_venv
 
 clean_pack:
 	rm -f *.tar.gz
@@ -50,13 +50,15 @@ make_build:
 	mkdir make_build
 	cp -R ./fit make_build
 	cp -R ./apply make_build
-	cp -R ./get_coef make_build
+	cp -R ./get_coeffs make_build
 	cp -R ./prophet make_build
 	cp -R ./model make_build
 
 	cp *.md make_build/fit/
 	cp *.md make_build/apply/
-	cp *.md make_build/get_coef/
+	cp *.md make_build/get_coeffs/
+	cp *.md make_build/prophet/
+	cp *.md make_build/model/
 
 	mkdir -p make_build/ts_forecast_venv/lib/python3.9/site-packages
 	cp -R ./ts_forecasting  make_build/ts_forecast_venv/lib/python3.9/site-packages
