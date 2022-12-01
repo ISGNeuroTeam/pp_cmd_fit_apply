@@ -6,6 +6,7 @@ from otlang.sdk.syntax import Keyword, Positional, OTLType
 from pp_exec_env.base_command import BaseCommand, Syntax
 from ts_forecasting.ts_forecasting import TimeSeriesForecaster
 from ts_forecasting.model_params import ModelParams
+from ts_forecasting.model_storage import Storage
 
 
 class FitCommand(BaseCommand):
@@ -18,7 +19,8 @@ class FitCommand(BaseCommand):
             Positional("feature_cols", required=True, otl_type=OTLType.STRING),
             Positional("into_word", required=True, otl_type=OTLType.TERM),
             Positional("model_name", required=True, otl_type=OTLType.TEXT),
-            Keyword("time_field", required=False, otl_type=OTLType.TEXT)
+            Keyword("time_field", required=False, otl_type=OTLType.TEXT),
+            Keyword("private", required=False, otl_type=OTLType.BOOLEAN)
         ],
     )
     use_timewindow = False  # Does not require time window arguments
@@ -50,10 +52,6 @@ class FitCommand(BaseCommand):
         target_col = self.get_arg('target_col').value
 
         model_name = self.get_arg('model_name').value
-        models_dir = Path(self.config['dir']['model_dir'])
-        if not models_dir.exists():
-            models_dir.mkdir(parents=True, exist_ok=True)
-        full_model_path = Path(self.config['dir']['model_dir']) / model_name
 
         time_field = self.get_arg('time_field').value or '_time'
         if time_field not in df.columns:
@@ -74,7 +72,10 @@ class FitCommand(BaseCommand):
             features_cols=feature_cols
         )
 
-        dump(model, full_model_path)
+        private = self.get_arg('private').value or False
+        Storage(
+            self.config['dir']['model_dir']
+        ).save(model, model_name, self.platform_envs['user_guid'], private)
 
         predicted_df = model.predict(
             features_df=copy_df,
