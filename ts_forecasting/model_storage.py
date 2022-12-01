@@ -42,6 +42,22 @@ class Storage:
 
         return load(full_model_path)
 
+    def list(self, user_id):
+        """
+        Returns all models names from public storage and private if private=True
+        """
+        public_storage = self._get_public_storage_path()
+        public_model_list = [
+            (os.path.join(dp, f).replace(str(public_storage) + os.sep, ''), 'public')
+            for dp, dn, filenames in os.walk(public_storage) for f in filenames
+        ]
+        private_storage = self._get_private_storage_path(user_id)
+        private_model_list = [
+            (os.path.join(dp, f).replace(str(private_storage) + os.sep, ''), 'private')
+            for dp, dn, filenames in os.walk(private_storage) for f in filenames
+        ]
+        return public_model_list + private_model_list
+
     def _get_private_storage_path(self, user_id: str):
         return self.storage_dir / 'private' / user_id
 

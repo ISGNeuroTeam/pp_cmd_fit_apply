@@ -52,6 +52,7 @@ make_build:
 	cp -R ./apply make_build
 	cp -R ./get_coef make_build
 	cp -R ./prophet make_build
+	cp -R ./model make_build
 
 	cp *.md make_build/fit/
 	cp *.md make_build/apply/
@@ -88,6 +89,9 @@ venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/prophet: venv
 
 venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/get_coeffs: venv
 	ln -r -s ./get_coeffs venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/get_coeffs
+
+venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/model: venv
+	ln -r -s ./model venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/model
 
 venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini:
 	cp ./venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.example.ini ./venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini
