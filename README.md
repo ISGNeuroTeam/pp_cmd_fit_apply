@@ -14,18 +14,32 @@ Usage example:
 ```
 ... | prophet value, future=101, period='D', modelType=additive
 ```
-Saving into private storage:  
+Saving into private storage:    
 ```
 ... | fit lr "col" from "col1, col2, col3" into <model_name>, private=True
 ```  
-Load from private storage:
+Load from private storage:  
 ```
 ... |  apply <model_name>, private=True
 ```  
-Model name may include relative path 
+Model name may include relative path  
 ```
 ... | fit lr "col" from "col1, col2, col3" into "<dir_name1/dir_name2/model_name>"
-```  
+```
+Get available model list:  
+```
+| model list 
+```
+Delete model from private model storage:  
+```
+| model delete unique_model_name, private=True
+```
+
+Delete model from public model storage:
+```
+| model delete unique_model_name
+```
+
 ## Getting started
 1. Make develop python virtual environment
     ```bash
