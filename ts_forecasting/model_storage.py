@@ -64,6 +64,15 @@ class Storage:
     def _get_public_storage_path(self):
         return self.storage_dir / 'public'
 
+    def delete(self, model_path: str, user_id, private=False):
+        path_in_storage, model_name = self._get_path_in_storage_and_name(model_path)
+        private_model_full_path = self._get_private_storage_path(user_id) / path_in_storage / model_name
+        public_model_full_path = self._get_public_storage_path() / path_in_storage / model_name
+        if private:
+            private_model_full_path.unlink(missing_ok=True)
+        else:
+            public_model_full_path.unlink(missing_ok=True)
+
     @staticmethod
     def _get_path_in_storage_and_name(model_path: str):
         model_path = Path(model_path)

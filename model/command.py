@@ -10,6 +10,8 @@ class ModelCommand(BaseCommand):
     syntax = Syntax(
         [
             Positional("command", required=True, otl_type=OTLType.TEXT),
+            Positional("model_name", required=False, otl_type=OTLType.TEXT),
+            Keyword("private", required=False, otl_type=OTLType.BOOLEAN)
         ],
     )
     use_timewindow = False  # Does not require time window arguments
@@ -24,9 +26,12 @@ class ModelCommand(BaseCommand):
             self.config['dir']['model_dir']
         )
         user_id = self.platform_envs['user_guid']
-        model_list = model_storage.list(user_id)
 
-        if command == 'list':
-            return pd.DataFrame(model_list, columns=['model_path', 'storage_type'])
-        else:
-            return df
+        if command == 'delete':
+            model_storage.delete(
+                self.get_arg('model_name').value, user_id, self.get_arg('private').value
+            )
+
+        return pd.DataFrame(
+            model_storage.list(user_id), columns=['model_path', 'storage_type']
+        )
