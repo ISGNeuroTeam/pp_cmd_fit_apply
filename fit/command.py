@@ -33,7 +33,7 @@ class FitCommand(BaseCommand):
         model_type = self.get_arg('model_type').value
         if model_type not in ModelParams.MODELS:
             model_types_str = '\n'.join([f'- {key} - {value}' for key, value in ModelParams.MODELS.items()])
-            raise ValueError(f'Unsupported forecaster type. Known types is:\n {model_types_str}')
+            raise ValueError(f'Unsupported forecaster type. Known types are:\n {model_types_str}')
 
         # Check from word
         from_word = self.get_arg("from_word").value
