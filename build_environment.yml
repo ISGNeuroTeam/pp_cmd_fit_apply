@@ -112,3 +112,4 @@ dependencies:
     - setuptools-git==1.2
     - tatsu==5.6.1
     - tqdm==4.64.1
+    - statsmodels

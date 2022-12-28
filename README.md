@@ -12,7 +12,13 @@ Usage example:
 ... | get_coef <model_name>
 ```
 ```
-... | prophet value, future=101, period='D', modelType=additive
+... | prophet value, future=101, period='D', modelType=additive to_file='opt/otp/test.parquet'
+```
+```
+... | gen_distr 'pert' size=100 a=100 b=200 c=300 to_file='opt/otp/test.parquet'
+```
+```
+... | ets 'value' future=90 period='D' to_file='opt/otp/test.parquet'
 ```
 Saving into private storage:    
 ```

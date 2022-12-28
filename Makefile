@@ -36,7 +36,7 @@ clean_conda:
 pack: make_build
 	rm -f *.tar.gz
 	echo Create archive \"fit-apply-$(VERSION)-$(BRANCH).tar.gz\"
-	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coeffs prophet model gen_distr ts_forecast_venv
+	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coeffs prophet model gen_distr ets ts_forecast_venv
 
 clean_pack:
 	rm -f *.tar.gz
@@ -54,6 +54,7 @@ make_build:
 	cp -R ./prophet make_build
 	cp -R ./model make_build
 	cp -R ./gen_distr make_build
+	cp -R ./ets make_build
 
 	cp *.md make_build/fit/
 	cp *.md make_build/apply/
@@ -61,6 +62,7 @@ make_build:
 	cp *.md make_build/prophet/
 	cp *.md make_build/model/
 	cp *.md make_build/gen_distr/
+	cp *.md make_build/ets/
 
 	mkdir -p make_build/ts_forecast_venv/lib/python3.9/site-packages
 	cp -R ./ts_forecasting  make_build/ts_forecast_venv/lib/python3.9/site-packages
@@ -100,13 +102,16 @@ venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/model: venv
 venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/gen_distr: venv
 	ln -r -s ./model venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/gen_distr
 
+venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/ets: venv
+	ln -r -s ./model venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/ets
+
 venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini:
 	cp ./venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.example.ini ./venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini
 
 venv/lib/python3.9/site-packages/ts_forecasting:
 	ln -r -s ./ts_forecasting ./venv/lib/python3.9/site-packages/ts_forecasting
 
-dev: venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/fit venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/apply venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/prophet venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/get_coeffs venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/gen_distr venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini venv/lib/python3.9/site-packages/ts_forecasting
+dev: venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/fit venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/apply venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/prophet venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/get_coeffs venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/gen_distr venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/ets venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini venv/lib/python3.9/site-packages/ts_forecasting
 	@echo "!!!IMPORTANT!!!. Configure otl_v1 config.ini"
 	@echo "   !!!!    "
 	@echo "   vi venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini"
