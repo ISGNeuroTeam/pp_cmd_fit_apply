@@ -160,3 +160,5 @@ storage/
 otl_v1_config.ini
 make_build
 *tar.gz
+
+conda/
