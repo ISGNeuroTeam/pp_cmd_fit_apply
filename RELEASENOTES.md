@@ -1,0 +1,1 @@
+## [0.2.0] - Changed prophet command name to prophet_fc, expanded options for period parameter
