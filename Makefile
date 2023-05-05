@@ -10,7 +10,7 @@ all:
  pack - make output archive, file name format \"fit_vX.Y.Z_BRANCHNAME.tar.gz\"\n\
 "
 
-VERSION := 0.0.1
+VERSION := 0.2.0
 BRANCH := $(shell git name-rev $$(git rev-parse HEAD) | cut -d\  -f2 | sed -re 's/^(remotes\/)?origin\///' | tr '/' '_')
 
 CONDA = conda/miniconda/bin/conda
@@ -36,7 +36,7 @@ clean_conda:
 pack: make_build
 	rm -f *.tar.gz
 	echo Create archive \"fit-apply-$(VERSION)-$(BRANCH).tar.gz\"
-	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coeffs prophet model gen_distr ets ts_forecast_venv
+	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coef prophet_fc ts_forecast_venv
 
 clean_pack:
 	rm -f *.tar.gz
@@ -50,19 +50,13 @@ make_build:
 	mkdir make_build
 	cp -R ./fit make_build
 	cp -R ./apply make_build
-	cp -R ./get_coeffs make_build
-	cp -R ./prophet make_build
-	cp -R ./model make_build
-	cp -R ./gen_distr make_build
-	cp -R ./ets make_build
+	cp -R ./get_coef make_build
+	cp -R ./prophet_fc make_build
 
 	cp *.md make_build/fit/
 	cp *.md make_build/apply/
-	cp *.md make_build/get_coeffs/
-	cp *.md make_build/prophet/
-	cp *.md make_build/model/
-	cp *.md make_build/gen_distr/
-	cp *.md make_build/ets/
+	cp *.md make_build/get_coef/
+	cp *.md make_build/prophet_fc/
 
 	mkdir -p make_build/ts_forecast_venv/lib/python3.9/site-packages
 	cp -R ./ts_forecasting  make_build/ts_forecast_venv/lib/python3.9/site-packages
@@ -91,19 +85,7 @@ venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/apply: venv
 	ln -r -s ./apply venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/apply
 
 venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/prophet: venv
-	ln -r -s ./prophet venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/prophet
-
-venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/get_coeffs: venv
-	ln -r -s ./get_coeffs venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/get_coeffs
-
-venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/model: venv
-	ln -r -s ./model venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/model
-
-venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/gen_distr: venv
-	ln -r -s ./model venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/gen_distr
-
-venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/ets: venv
-	ln -r -s ./model venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/ets
+	ln -r -s ./prophet_fc venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/prophet_fc
 
 venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini:
 	cp ./venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.example.ini ./venv/lib/python3.9/site-packages/postprocessing_sdk/pp_cmd/otl_v1/config.ini

@@ -14,7 +14,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import Lasso
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor, DMatrix
-from statsmodels.tsa.api import SimpleExpSmoothing
 
 from .ts_feature_extraction import extract_autoregression_features, add_autoregression_features
 from .model_params import ModelParams
@@ -24,9 +23,9 @@ from .constants import *
 class TimeSeriesForecaster(ABC):
     params: ModelParams
     pipeline: Pipeline
-    features_: Optional[List[str]] = None
-    non_ar_features_: Optional[List[str]] = None
+    features_: List[str] = None
     autoregression_features_: Optional[Dict] = None
+    selected_features_: Optional[List[str]] = None
 
     def __init__(self, params: ModelParams):
         self.params = params
@@ -65,8 +64,6 @@ class TimeSeriesForecaster(ABC):
 
             # 19-10-2022:
             self.trend_model_ = None
-
-            self.non_ar_features_ = features_cols
         else:
             if not self.params.is_autoregression:
                 #raise ValueError("Either autoregression flag or features dataframe must be set!")
@@ -248,7 +245,7 @@ class TimeSeriesProphetForecaster(TimeSeriesForecaster):
         return self
 
     def predict(self,
-                period: int,
+                period: int = 100,
                 target_col_as: Optional[str] = None) -> pd.DataFrame:
 
         freq = self.params.freq
@@ -272,22 +269,4 @@ class TimeSeriesProphetForecaster(TimeSeriesForecaster):
         )
         return forecast
 
-class TimeSeriesExponentialSmoothingForecaster:
-    def fit(self,
-            target_df: pd.DataFrame,
-            target_col: str):
-        self.history_end = target_df.index.max()
-        self.model = SimpleExpSmoothing(target_df[target_col], initialization_method="estimated").fit()
-        return self
 
-    def predict(self,
-                period: int,
-                freq: str,
-                target_col_as: Optional[str] = "ets_prediction"):
-        predicted = self.model.forecast(period)
-        forecast_start = self.history_end + pd.Timedelta(1, unit=freq)
-        forecast_end = self.history_end + pd.Timedelta(period, unit=freq)
-        forecast_dates = pd.date_range(start=forecast_start, end=forecast_end, freq=freq)
-        result = pd.DataFrame(predicted, columns=[target_col_as])
-        result['_time'] = forecast_dates.view('int64') // 1000000000
-        return result
