@@ -10,13 +10,13 @@ all:
  pack - make output archive, file name format \"fit_vX.Y.Z_BRANCHNAME.tar.gz\"\n\
 "
 
-VERSION := 0.0.1
+VERSION := 0.20
 BRANCH := $(shell git name-rev $$(git rev-parse HEAD) | cut -d\  -f2 | sed -re 's/^(remotes\/)?origin\///' | tr '/' '_')
 
 pack: make_build
 	rm -f *.tar.gz
 	echo Create archive \"fit-apply-$(VERSION)-$(BRANCH).tar.gz\"
-	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coef prophet ts_forecast_venv
+	cd make_build; tar czf ../fit-apply-$(VERSION)-$(BRANCH).tar.gz fit apply get_coef prophet_fc
 
 clean_pack:
 	rm -f *.tar.gz
@@ -31,7 +31,7 @@ make_build:
 	cp -R ./fit make_build
 	cp -R ./apply make_build
 	cp -R ./get_coef make_build
-	cp -R ./prophet make_build
+	cp -R ./prophet_fc make_build
 
 	cp *.md make_build/fit/
 	cp *.md make_build/apply/
